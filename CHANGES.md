@@ -4,6 +4,7 @@ Core Grammars:
 
 - fix(groovy) support underscores in numeric literals [greymoth-jp][]
 - fix(leaf) fix bug in Leaf keyword highlighting [Francesco Paolo Severino][]
+- fix(markdown) Ignore mid_word underscores, issue #4279 [Dan Vanderkam]
 
 Documentation:
 
@@ -14,6 +15,7 @@ CONTRIBUTORS
 [greymoth-jp]: https://github.com/greymoth-jp
 [Francesco Paolo Severino]: https://github.com/fpseverino
 [Haowei Hsu]: https://github.com/hwhsu1231
+[Dan Vanderkam]: https://github.com/danvk
 
 
 ## Version 11.11.2

@@ -157,10 +157,24 @@ export default function(hljs) {
       },
       {
         begin: /_(?![_\s])/,
-        end: /_/,
+        end: /_(?![a-zA-Z0-9])/,
         relevance: 0
       }
     ]
+  };
+
+  // A lookbehind-free stand-in for "an italicizing `_` must not be preceded by
+  // an alphanumeric character" (which would need `(?<![a-zA-Z0-9])`, unsupported
+  // in older Safari). This consumes an alphanumeric plus the single `_` that
+  // follows it as plain text; because it starts one character before the `_`, it
+  // wins the left-most match against ITALIC's `begin` and stops the `_` from
+  // opening emphasis (e.g. `mid_word`, `a_b_c`, `MAX_)`). The `(?!_)` leaves
+  // `__` for BOLD. This mode is intentionally kept *beside* the emphasis modes
+  // and never *inside* them, or it would also swallow a legitimate closing
+  // marker such as the final `_` of `_word_`.
+  const MIDWORD_UNDERSCORE = {
+    match: /[a-zA-Z0-9]_(?!_)/,
+    relevance: 0
   };
 
   // 3 level deep nesting is not allowed because it would create confusion
@@ -185,7 +199,14 @@ export default function(hljs) {
     m.contains = m.contains.concat(CONTAINABLE);
   });
 
-  CONTAINABLE = CONTAINABLE.concat(BOLD, ITALIC);
+  // The mid-word underscore guard sits alongside the emphasis modes (so it can
+  // out-race ITALIC's `begin`) but is deliberately kept out of CONTAINABLE, and
+  // therefore out of the emphasis modes themselves, where it would eat closing
+  // markers. It does belong inside BOLD, to protect the italic nested there
+  // (e.g. `**snake_case**`).
+  BOLD.contains.unshift(MIDWORD_UNDERSCORE);
+
+  CONTAINABLE = [ MIDWORD_UNDERSCORE ].concat(CONTAINABLE, BOLD, ITALIC);
 
   const HEADER = {
     className: 'section',
@@ -233,6 +254,7 @@ export default function(hljs) {
       HEADER,
       INLINE_HTML,
       LIST,
+      MIDWORD_UNDERSCORE,
       BOLD,
       ITALIC,
       BLOCKQUOTE,
